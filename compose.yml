@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: datawarehouse_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: datawarehouse
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # 🛠️ Fixed typo: "postsql" ➜ "postgresql"
+
+  etl:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/datawarehouse  # 🛠️ Fixed hostname: "postgresql" ➜ "postgres"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: datawarehouse_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"  # Optional: expose pgAdmin on port 5050
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
